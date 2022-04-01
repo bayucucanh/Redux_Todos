@@ -9,7 +9,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import {useDispatch, useSelector} from 'react-redux';
 
 import { connect } from 'react-redux';
-import { getTodos, AddTodos } from '../redux/action';
+import { getTodos, AddTodos, UpdateTodos, DeleteTodos } from '../redux/action';
 
 import styles from './style';
 
@@ -17,25 +17,43 @@ const Todos = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [button, setButton] = useState('Save');
+  const [selected, setSelected] = useState({});
   const [selectedStatus, setSelectedStatus] = useState('ON_PROGRESS');
 
   const dispatch = useDispatch();
   const todo = useSelector(state => state.appData.todos);
 
   const sendData = () => {
-    const dataObject = {
+    const data = {
       title: title,
       description: description,
-      status: selectedStatus
+      status: selectedStatus,
+    };
+
+    if (button === 'Save') {
+      dispatch(AddTodos(data));
+      setTitle('');
+      setDescription('');
+      dispatch(getTodos());
+    } else if (button === 'Update') {
+      dispatch(UpdateTodos(selected.id, data));
+      setTitle('');
+      setDescription('');
+      dispatch(getTodos());
     }
-
-    console.log(dataObject);
-
-    dispatch(AddTodos(dataObject));
-    setTitle('');
-    setDescription('');
-    dispatch(getTodos())
   }
+
+  const selectedItem = item => {
+    setSelected(item);
+    setTitle(item.title);
+    setDescription(item.description);
+    setButton('Update');
+  };
+
+  const Delete = id => {
+    dispatch(DeleteTodos(id))
+  };
+
 
   useEffect(() => {
     dispatch(getTodos());
@@ -86,7 +104,7 @@ const Todos = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => this.setState({ selectedStatus: 'DONE' })}
+            onPress={() => setSelectedStatus('DONE')}
             style={[
               styles.statusButton,
               selectedStatus === 'DONE' && styles.statusButtonSelected
@@ -104,7 +122,7 @@ const Todos = () => {
         </View>
         <View style={{ flexDirection: 'row', marginLeft: 'auto', marginTop: 20 }}>
           <TouchableOpacity style={styles.saveButon} onPress={() => sendData()}>
-            <Text style={styles.buttonText}>Save</Text>
+            <Text style={styles.buttonText}>{button}</Text>
             <Icon name="save" size={20} color="white" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.cancelButton}>
@@ -115,7 +133,7 @@ const Todos = () => {
         <View style={styles.content}>
           <Text style={styles.todoDateText}>Monday</Text>
           {todo.map(item => (
-          <View style={styles.cardListContainer}>
+          <View style={styles.cardListContainer} key={item.id}>
             <View style={styles.todoCard}>
               <View style={styles.todoTitleContainer}>
                 <View style={styles.todoActionContainer}>
@@ -126,16 +144,16 @@ const Todos = () => {
                 </View>
 
                 <View style={styles.todoActionContainer}>
-                  <TouchableOpacity style={styles.editButton}>
+                  <TouchableOpacity style={styles.editButton} onPress={() => selectedItem(item, item.id)}>
                     <Icon name="edit" size={20} color="white" />
                   </TouchableOpacity>
                   <TouchableOpacity>
-                    <Icon name="trash-2" size={20} color="white" />
+                    <Icon name="trash-2" size={20} color="white" onPress={() => Delete(item.id)}/>
                   </TouchableOpacity>
                 </View>
               </View>
               <View>
-                <Text style={styles.todoDescription}>{todo.title}</Text>
+                <Text style={styles.todoDescription}>{item.description}</Text>
               </View>
             </View>
           </View>

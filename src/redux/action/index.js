@@ -33,10 +33,31 @@ export const AddTodos = data => async dispatch => {
   try {
     await axios.post('http://code.aldipee.com/api/v1/todos', data)
     .then(() => {
-      Alert.alert('ADD SUCCES')
+      Alert.alert('Add Succes')
     })
     dispatch(addTodos(data))
   } catch (err) {
-    console.log((err));
+    console.log(err);
   }
 }
+
+export const UpdateTodos = (id, data) => async dispatch => {
+  try {
+    await axios.post(`http://code.aldipee.com/api/v1/todos/${id}`, data)
+    .then(() => {
+      Alert.alert('Update Succes')
+    })
+    dispatch(updateTodos(data))
+  } catch {
+    console.log(err);
+  }
+}
+
+export const DeleteTodos = id => async dispatch => {
+  try {
+    await axios.delete(`http://code.aldipee.com/api/v1/todos/${id}`);
+    dispatch(deleteTodos(id));
+  } catch (err) {
+    console.log(err);
+  }
+};
